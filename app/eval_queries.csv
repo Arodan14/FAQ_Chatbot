@@ -1,0 +1,31 @@
+query,expected_intent
+How do I register for courses?,Course Registration Procedure
+I cannot log into the university system,Access Issue
+How can I add a class?,Add/Drop Course Procedure
+When can I drop a course?,Add/Drop Course Timing
+Do I need to renew registration every semester?,Semester Registration Requirement
+Why can't I send my course selection for approval?,Course Approval Issue
+Who is my advisor?,Find Advisor
+What grade counts as passing?,Sufficient Grades for Success
+What grades mean I failed the course?,Failing Grades Identification
+What is the attendance rule?,Attendance Requirement
+Does a medical report still count as absence?,Medical Report and Absenteeism
+Can I still take exams after missing too many classes?,Exam Eligibility after Attendance Exceeded
+Can I take another elective if I fail one?,Elective Course Retake Option
+What should I do if I fail a course?,Failed Course Next Step
+How do I apply for the make-up exam?,Make-up Exam Application
+Can I take the final if I missed the midterm?,Exam Eligibility after Missing Midterm
+Where can I see exam dates?,Exam Dates Information
+Does the academic calendar only show exams?,Academic Calendar Scope
+Can I freeze my postgraduate registration?,Registration Freeze Availability
+How do I apply to freeze my registration?,Registration Freeze Application
+How many semesters can I freeze my registration?,Registration Freeze Semester Limit
+When do I apply for the single course exam?,Single Course Exam Application Date
+How do I apply for the single course exam?,Single Course Exam Application Process
+When can I apply for additional graduation course exams?,Additional Graduation Course Exam Date
+How do I apply for additional graduation course exams?,Additional Graduation Course Exam Application
+Where can I find exam results?,Exam Results Information
+How are distance education exams conducted?,Distance Education Exam Format
+How are exams conducted in formal graduate programs?,Formal Graduate Exam Format
+How is the exam schedule planned?,Exam Schedule Planning
+How are exam schedules announced?,Exam Schedule Announcement

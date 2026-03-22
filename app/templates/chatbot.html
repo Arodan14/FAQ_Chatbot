@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <div class="chat-messages" id="chatMessages">
+  </div>
+
+  <div class="chat-input-container">
+    <input
+      type="text"
+      id="messageInput"
+      class="chat-input"
+      placeholder="Ask a university FAQ..."
+      onkeypress="handleKeyPress(event)"
+    />
+    <button class="send-button" onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const welcomeMessages = {{ welcome_messages | tojson }};
+    const defaultWelcomeMessage = {{ default_welcome_message | tojson }};
+    const presetPrompt = {{ preset_prompt | tojson }};
+    const autorunPrompt = {{ autorun_prompt | tojson }};
+
+    function getSettings() {
+        const defaults = {
+            randomWelcome: true,
+            enterToSend: true,
+            autoScroll: true
+        };
+
+        try {
+            const saved = JSON.parse(localStorage.getItem('faqBotSettings') || '{}');
+            return { ...defaults, ...saved };
+        } catch (error) {
+            console.error(error);
+            return defaults;
+        }
+    }
+
+    function scrollChatIfEnabled() {
+        const chatMessages = document.getElementById('chatMessages');
+        if (getSettings().autoScroll) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+
+    function addBotMessage(message) {
+        const chatMessages = document.getElementById('chatMessages');
+        const botMessage = document.createElement('div');
+        botMessage.className = 'chat-message';
+        botMessage.innerHTML = message.replace(/\n/g, '<br>');
+        chatMessages.appendChild(botMessage);
+        scrollChatIfEnabled();
+    }
+
+    function loadWelcomeMessage() {
+        const settings = getSettings();
+        const greeting = settings.randomWelcome
+            ? welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)]
+            : defaultWelcomeMessage;
+        addBotMessage(greeting);
+    }
+
+    async function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const messageText = messageInput.value.trim();
+
+        if (messageText !== "") {
+            const chatMessages = document.getElementById('chatMessages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chat-message user';
+            userMessage.textContent = messageText;
+            chatMessages.appendChild(userMessage);
+
+            messageInput.value = '';
+            scrollChatIfEnabled();
+
+            let botReply = 'Something went wrong while contacting the chatbot.';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: messageText })
+                });
+
+                const data = await response.json();
+                botReply = data.response || botReply;
+            } catch (error) {
+                console.error(error);
+            }
+
+            addBotMessage(botReply);
+        }
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter' && getSettings().enterToSend) {
+            sendMessage();
+            event.preventDefault();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadWelcomeMessage();
+
+        const messageInput = document.getElementById('messageInput');
+        if (presetPrompt) {
+            messageInput.value = presetPrompt;
+            messageInput.focus();
+            if (autorunPrompt) {
+                sendMessage();
+            }
+        }
+    });
+  </script>
+{% endblock %}

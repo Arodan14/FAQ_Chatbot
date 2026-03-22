@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <div class="page-panel">
+    <h1 class="page-title">Help</h1>
+    <p class="page-copy">
+      Use this page to understand what the chatbot can answer and to jump straight
+      into common FAQ prompts.
+    </p>
+
+    <h2 class="page-subtitle">Quick Tips</h2>
+    <ul class="info-list">
+      <li>Ask short, direct questions about registration, exams, attendance, or advisors.</li>
+      <li>Type <b>list faq questions</b> to see all available FAQ topics.</li>
+      <li>If the result looks wrong, rephrase your question using simpler wording.</li>
+      <li>Use the Settings page to control the welcome message and chat behavior.</li>
+    </ul>
+
+    <h2 class="page-subtitle">Try These Prompts</h2>
+    <div class="prompt-list">
+      {% for prompt in sample_prompts %}
+        <a class="prompt-card" href="/?prompt={{ prompt|urlencode }}&autorun=1">{{ prompt }}</a>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

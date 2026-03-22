@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <div class="page-panel">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-copy">
+      These settings are saved in your browser using local storage, so they stay
+      active when you reopen the chatbot on this device.
+    </p>
+
+    <div class="settings-list">
+      <label class="setting-row">
+        <span>Random welcome message</span>
+        <input type="checkbox" id="randomWelcome" />
+      </label>
+      <label class="setting-row">
+        <span>Press Enter to send</span>
+        <input type="checkbox" id="enterToSend" />
+      </label>
+      <label class="setting-row">
+        <span>Auto-scroll chat</span>
+        <input type="checkbox" id="autoScroll" />
+      </label>
+    </div>
+
+    <div class="page-actions">
+      <button class="send-button" onclick="saveSettings()">Save Settings</button>
+      <button class="secondary-button" onclick="resetSettings()">Reset Defaults</button>
+    </div>
+
+    <p class="status-text" id="settingsStatus">Your current browser settings are loaded.</p>
+  </div>
+
+  <script>
+    const defaultSettings = {
+        randomWelcome: true,
+        enterToSend: true,
+        autoScroll: true
+    };
+
+    function readSavedSettings() {
+        try {
+            return {
+                ...defaultSettings,
+                ...JSON.parse(localStorage.getItem('faqBotSettings') || '{}')
+            };
+        } catch (error) {
+            console.error(error);
+            return defaultSettings;
+        }
+    }
+
+    function applySettingsToForm() {
+        const settings = readSavedSettings();
+        document.getElementById('randomWelcome').checked = settings.randomWelcome;
+        document.getElementById('enterToSend').checked = settings.enterToSend;
+        document.getElementById('autoScroll').checked = settings.autoScroll;
+    }
+
+    function saveSettings() {
+        const settings = {
+            randomWelcome: document.getElementById('randomWelcome').checked,
+            enterToSend: document.getElementById('enterToSend').checked,
+            autoScroll: document.getElementById('autoScroll').checked
+        };
+        localStorage.setItem('faqBotSettings', JSON.stringify(settings));
+        document.getElementById('settingsStatus').textContent = 'Settings saved successfully.';
+    }
+
+    function resetSettings() {
+        localStorage.setItem('faqBotSettings', JSON.stringify(defaultSettings));
+        applySettingsToForm();
+        document.getElementById('settingsStatus').textContent = 'Settings reset to defaults.';
+    }
+
+    document.addEventListener('DOMContentLoaded', applySettingsToForm);
+  </script>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/layout.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Metrophobic&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Chat Header with Dropdown -->
+        <div class="chat-header">
+          <div class="dropdown">
+            <a href="/"><button>FAQ BOT</button></a>
+            <div class="dropdown-content">
+              <a href="/about">About</a>
+              <a href="/settings">Settings</a>
+              <a href="/help">Help</a>
+            </div>
+          </div>
+        </div>
+    {% block content %} {% endblock %}
+</body>
+</html>
