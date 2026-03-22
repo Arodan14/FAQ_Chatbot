@@ -71,6 +71,12 @@ STOPWORDS = {
 }
 
 QUESTION_TYPE_KEYWORDS = {"how", "when", "where", "what", "why", "can", "do", "does", "is", "are"}
+SEMESTER_LABELS = {
+    "fall semester": "Fall Semester",
+    "spring semester": "Spring Semester",
+    "summer term": "Summer Term",
+    "public holidays": "Public Holidays",
+}
 
 
 def _clean_text(value: object) -> str:
@@ -340,6 +346,97 @@ class FAQService:
         tokens = _normalize_query_text(user_input).split()
         return tokens[0] if tokens and tokens[0] in QUESTION_TYPE_KEYWORDS else ""
 
+    def _extract_semester(self, normalized_input: str) -> str:
+        for phrase, label in SEMESTER_LABELS.items():
+            if phrase in normalized_input:
+                return label
+        return ""
+
+    def _calendar_entries_for_topics(
+        self,
+        semester: str,
+        topic_keywords: tuple[str, ...],
+        excluded_keywords: tuple[str, ...] = (),
+    ) -> list[FAQEntry]:
+        matches = [
+            entry
+            for entry in self.entries
+            if entry.source == "calendar"
+            and (not semester or entry.semester == semester)
+            and any(keyword in entry.topic.lower() for keyword in topic_keywords)
+            and not any(keyword in entry.topic.lower() for keyword in excluded_keywords)
+        ]
+        seen_topics: set[tuple[str, str]] = set()
+        unique_matches: list[FAQEntry] = []
+        for entry in matches:
+            key = (entry.topic, entry.semester)
+            if key in seen_topics:
+                continue
+            seen_topics.add(key)
+            unique_matches.append(entry)
+        return unique_matches
+
+    def _format_exam_summary(self, semester: str, entries: list[FAQEntry]) -> str:
+        intro = (
+            f"Here are the main exam periods for the {semester}:"
+            if semester
+            else "I found multiple exam periods. Please specify a semester for a precise answer."
+        )
+        if not semester:
+            return intro
+
+        lines = [intro]
+        for entry in entries:
+            lines.append(f"- {entry.topic.title()}: {entry.answer}")
+        return "\n".join(lines)
+
+    def _handle_exam_start_query(self, normalized_input: str) -> str | None:
+        exam_period_markers = ("exam", "midterm", "final", "retake")
+        if "start" not in normalized_input or not any(
+            marker in normalized_input for marker in exam_period_markers
+        ):
+            return None
+
+        semester = self._extract_semester(normalized_input)
+        if "final" in normalized_input:
+            target_entries = self._calendar_entries_for_topics(
+                semester,
+                ("final exams",),
+                ("deadline", "grade", "application"),
+            )
+        elif "midterm" in normalized_input:
+            target_entries = self._calendar_entries_for_topics(
+                semester,
+                ("midterms",),
+                ("deadline", "make-up", "grade", "application"),
+            )
+        else:
+            if not semester:
+                return (
+                    "Exam dates are time-sensitive. Please specify the semester and, if possible, "
+                    "the exam type, such as midterms or final exams."
+                )
+            target_entries = self._calendar_entries_for_topics(
+                semester,
+                ("midterms", "final exams", "retake exams"),
+            )
+            if target_entries:
+                return self._format_exam_summary(semester, target_entries)
+            return (
+                f"I could not find a calendar exam period for the {semester}. "
+                "Try asking about midterms, final exams, or retake exams."
+            )
+
+        if not target_entries:
+            return None
+        if len(target_entries) > 1 and not semester:
+            topic_name = target_entries[0].topic.lower()
+            return (
+                f"I found academic calendar information for {topic_name}, but it is time-sensitive. "
+                "Please specify the semester, such as Fall, Spring, or Summer."
+            )
+        return target_entries[0].answer
+
     def _rerank_score(
         self,
         base_score: float,
@@ -410,14 +507,18 @@ class FAQService:
             return self.list_questions()
 
         if self._is_greeting(cleaned_input):
-            return "Hello! Ask me a Beykoz University FAQ and I'll do my best to help."
+            return "Hello! You are chatting with FAQ_BOT. Ask me a Beykoz University question and I'll do my best to help."
+
+        normalized_input = _normalize_query_text(cleaned_input)
+        exam_start_response = self._handle_exam_start_query(normalized_input)
+        if exam_start_response:
+            return exam_start_response
 
         best_entry = self.get_best_match(cleaned_input)
         if best_entry is None:
             return UNKNOWN_RESPONSE
 
         semester_terms = {"fall", "spring", "summer"}
-        normalized_input = _normalize_query_text(cleaned_input)
         if best_entry.source == "calendar" and not any(term in normalized_input for term in semester_terms):
             sibling_entries = [
                 entry

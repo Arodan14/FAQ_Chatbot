@@ -7,11 +7,11 @@ import random
 app = Flask(__name__)
 
 WELCOME_MESSAGES = [
-    "Welcome! Ask me a frequently asked question about Beykoz University.",
-    "Hello! I can help with popular asked questions from the university FAQ.",
-    "FAQ ready. Try a common student question or ask me to list the available FAQs.",
-    "Need a quick answer? I match your message against the frequently asked questions dataset.",
-    "Popular university questions start here. Ask me about registration, exams, attendance, or advisors.",
+    "Welcome to FAQ_BOT. Ask me a frequently asked question about Beykoz University.",
+    "Hello from FAQ_BOT. I can help with popular university questions.",
+    "FAQ_BOT is ready. Try a common student question or ask me to list the available questions.",
+    "Need a quick answer? FAQ_BOT matches your message against the FAQ dataset.",
+    "FAQ_BOT is here to help with registration, exams, attendance, advisors, and more.",
 ]
 
 
@@ -19,7 +19,7 @@ WELCOME_MESSAGES = [
 def home():
     return render_template(
         "chatbot.html",
-        title="FAQ BOT | HOME",
+        title="FAQ_BOT | HOME",
         welcome_messages=WELCOME_MESSAGES,
         default_welcome_message=random.choice(WELCOME_MESSAGES),
         preset_prompt=request.args.get("prompt", ""),
@@ -29,12 +29,12 @@ def home():
 
 @app.route("/about")
 def about():
-    return render_template("about.html", title="FAQ BOT | ABOUT")
+    return render_template("about.html", title="FAQ_BOT | ABOUT")
 
 
 @app.route("/settings")
 def settings():
-    return render_template("settings.html", title="FAQ BOT | SETTINGS")
+    return render_template("settings.html", title="FAQ_BOT | SETTINGS")
 
 
 @app.route("/help")
@@ -49,7 +49,7 @@ def help_page():
     ]
     return render_template(
         "help.html",
-        title="FAQ BOT | HELP",
+        title="FAQ_BOT | HELP",
         sample_prompts=sample_prompts,
     )
 
